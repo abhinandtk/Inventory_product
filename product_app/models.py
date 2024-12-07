@@ -24,21 +24,53 @@ class Products(models.Model):
         verbose_name_plural = "products"
         unique_together = (("ProductCode", "ProductID"),)
         ordering = ("-CreatedDate", "ProductID")
+    def __str__(self):
+        return self.ProductName
+
+class Variant_type(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    name=models.CharField(max_length=225,unique=True)
+    class Meta:
+        db_table = "variant_types"
+        verbose_name = "Variant Type"
+        verbose_name_plural = "Variant Types"
+    def __str__(self):
+        return self.name
 
 class Variants(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     product=models.ForeignKey(Products,related_name="variants",on_delete=models.CASCADE)
-    name=models.CharField(max_length=225)
+    variant_type=models.ForeignKey(Variant_type,related_name="variants",on_delete=models.CASCADE)
+
 
     class Meta:
         db_table="product_variants"
-        unique_together=("product","name")
+        unique_together=("product","variant_type")
+    def __str__(self):
+        return self.variant_type.name
+
+class SubVariant_types(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    name=models.CharField(max_length=225,unique=True)
+    variant_type=models.ForeignKey(Variant_type,related_name="subvariant_types",on_delete=models.CASCADE)
+    class Meta:
+        db_table = "subvariant_types"
+        verbose_name = "Subvariant Type"
+        verbose_name_plural = "Subvariant Types"
+    def __str__(self):
+        return self.name
 
 class SubVariants(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     variant=models.ForeignKey(Variants,related_name="subvariants",on_delete=models.CASCADE)
-    options=models.CharField(max_length=225)
+    options=models.ForeignKey(SubVariant_types,related_name="subvariants",on_delete=models.CASCADE)
+    # stock = models.IntegerField(default=0)  # Track stock here
 
     class Meta:
         db_table="products_subvariants"
         unique_together=("variant","options")
+    def __str__(self):
+        return self.options.name
+
+
+

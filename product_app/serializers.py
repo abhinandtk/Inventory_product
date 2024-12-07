@@ -2,17 +2,26 @@ from rest_framework import serializers
 from .models import *
 
 class SubVarientSerializer(serializers.ModelSerializer):
+    subvariant_name = serializers.CharField(source="options.name", read_only=True)  # Expose the name in the response
+
     class  Meta:
-        fields=['id','options']
+        fields=['id','options','subvariant_name']
         model=SubVariants
+        extra_kwargs={
+   'options': {'write_only': True} 
+        }
+ 
 
 class VarientSerializer(serializers.ModelSerializer):
     subvariants=SubVarientSerializer(many=True)
+    variant_name = serializers.CharField(source="variant_type.name", read_only=True)  # Expose the name in the response
     class Meta:
-        fields=['id','name','subvariants']
+        fields=['id','subvariants','variant_type','variant_name']
         model=Variants
     extra_kwargs = {
         'product': {'read_only': True},
+        'variant_name':{'read_only':True},
+        'variant_type': {'write_only': True} 
     }
 class ProductSerializer(serializers.ModelSerializer):
     variants=VarientSerializer(many=True)

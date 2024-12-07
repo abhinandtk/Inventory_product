@@ -24,3 +24,21 @@ class Products(models.Model):
         verbose_name_plural = "products"
         unique_together = (("ProductCode", "ProductID"),)
         ordering = ("-CreatedDate", "ProductID")
+
+class Variants(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    product=models.ForeignKey(Products,related_name="variants",on_delete=models.CASCADE)
+    name=models.CharField(max_length=225)
+
+    class Meta:
+        db_table="product_variants"
+        unique_together=("product","name")
+
+class SubVariants(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    variant=models.ForeignKey(Variants,related_name="subvariants",on_delete=models.CASCADE)
+    options=models.CharField(max_length=225)
+
+    class Meta:
+        db_table="products_subvariants"
+        unique_together=("variant","options")
